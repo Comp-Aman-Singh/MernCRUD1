@@ -1,8 +1,8 @@
 //Import expresss
 const express = require("express");
 const connectToDb = require("./config/connectToDb");
-const Note = require("./models/note.js");
-
+const notesControllers = require("./controllers/notesControllers");
+const cors = require("cors");
 //calling env variable
 require("dotenv").config();
 
@@ -12,31 +12,27 @@ connectToDb();
 //creating the express app
 const app = express();
 
-//Routing in the app
-app.get("/", (req, res) => {
-  res.json({ hello: "hel" });
-});
-
 //configure Express
+app.use(cors());
 app.use(express.json());
 
-app.post("/notes", async (req, res) => {
-  console.log("notes");
-  // get the sent in data off request body
+//------------------------Routing in the app-------------------------------
 
-  const title = req.body.title;
-  const body = req.body.body;
-  try {
-    const note = await Note.create({
-      title: title,
-      body: body,
-    });
-    res.json({ note: note });
-    console.log("The request has been sent ");
-  } catch (err) {
-    console.log("Internal server error", err);
-  }
-});
+//fetching the data
+app.get("/notes", notesControllers.fetchAll);
+
+//fetching the data  by id
+app.get("/notes/:id", notesControllers.fetchSingle);
+
+//addnning the data
+app.post("/notes", notesControllers.addData);
+
+//Updating the data
+app.put("/notes/:id", notesControllers.updateData);
+//Deleting the data
+app.delete("/notes/:id", notesControllers.deleteData);
+
+//displayin only the data that are inserted today
 
 //starting the sever
 app.listen(process.env.PORT);
